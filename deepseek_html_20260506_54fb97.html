@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎡 Колесо Фортуны | Испытай удачу</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* главный контейнер */
+        .fortune-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            border-radius: 68px;
+            padding: 25px 20px 30px 20px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .wheel-container {
+            background: #2b1e2f;
+            border-radius: 60px;
+            padding: 20px;
+            box-shadow: inset 0 0 15px #00000033, 0 20px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            height: auto;
+            max-width: 600px;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 12px 28px black, 0 0 0 12px #ffd966, 0 0 0 18px #b87c2e;
+            transition: transform 0.1s ease;
+        }
+        canvas:active {
+            transform: scale(0.98);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0 20px;
+        }
+
+        .spin-btn {
+            background: radial-gradient(circle at 30% 10%, #ffcc33, #e6a017);
+            border: none;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 14px 36px;
+            border-radius: 60px;
+            color: #2c1a0a;
+            font-family: inherit;
+            letter-spacing: 3px;
+            box-shadow: 0 10px 0 #7a3e0c;
+            cursor: pointer;
+            transition: 0.09s linear;
+            text-transform: uppercase;
+            backdrop-filter: blur(2px);
+            width: 260px;
+            font-weight: 800;
+            text-shadow: 0 1px 0 #ffec9f;
+        }
+
+        .spin-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #7a3e0c;
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            transform: translateY(0);
+            cursor: not-allowed;
+            filter: grayscale(0.1);
+            box-shadow: 0 10px 0 #7a3e0c;
+        }
+
+        .result-panel {
+            text-align: center;
+            background: #1e1a1fcc;
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 15px 20px;
+            margin-top: 15px;
+            border: 1px solid gold;
+            transition: all 0.2s;
+        }
+
+        .prize-text {
+            font-size: 1.7rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #FFE6B0, #ffbc6e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 3px rgba(0,0,0,0.3);
+            word-break: break-word;
+        }
+
+        .label {
+            font-size: 1rem;
+            color: #ecd9b4;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .description {
+            margin-top: 25px;
+            background: #00000066;
+            border-radius: 36px;
+            padding: 18px 20px;
+            color: #f5e7cf;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            border-left: 6px solid #f6b83d;
+            text-align: left;
+        }
+
+        .description h3 {
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffde9c;
+        }
+
+        hr {
+            border-color: #ffb34730;
+            margin: 12px 0;
+        }
+
+        @media (max-width: 550px) {
+            .prize-text { font-size: 1.3rem; }
+            .spin-btn { font-size: 1.5rem; width: 200px; padding: 10px 20px;}
+            .description { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="fortune-card">
+    <div class="wheel-container">
+        <canvas id="wheelCanvas" width="600" height="600"></canvas>
+    </div>
+    <div class="controls">
+        <button class="spin-btn" id="spinButton">🎲 КРУТИТЬ 🎲</button>
+    </div>
+    <div class="result-panel">
+        <div class="label">✨ ВАШ ПРИЗ ✨</div>
+        <div class="prize-text" id="resultMessage">Нажми на колесо или кнопку</div>
+    </div>
+    
+    <div class="description">
+        <h3>🎡 КАК СОЗДАНО ЭТО КОЛЕСО ФОРТУНЫ?</h3>
+        <p>✅ <strong>Canvas + анимация:</strong> всё отрисовано на JavaScript с помощью холста. 8 секторов с разными призами, цвета и текст поворачиваются динамически.<br>
+        ✅ <strong>Честный случайный выбор:</strong> случайный угол поворота (от 4 до 9 полных оборотов) + плавное замедление (easing cubic). Победный сектор определяется строго по положению стрелки.<br>
+        ✅ <strong>Интерактив:</strong> кнопка и само колесо обрабатывают клик, блокировка повторного вращения до окончания анимации, адаптив под экран.<br>
+        ✅ <strong>Дизайн:</strong> золотистый обод, неоновая стрелка, тени, премиум-градиенты и эффект «нажатия».<br>
+        🧠 <strong>Алгоритм:</strong> отрисовка сегментов, вращение в радианах, определение индекса через вектор угла стрелки, модальная логика результатов.</p>
+        <hr>
+        <p style="font-style:italic; margin-top:6px;">⚡ Крути колесо, выигрывай бонусы и наслаждайся атмосферой удачи! Каждый спин — новый шанс.</p>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- НАСТРОЙКИ СЕКТОРОВ (ПРИЗЫ И ЦВЕТА) ----------
+        const SEGMENTS = [
+            { name: "🍎 100",   value: "100 монет" },
+            { name: "💰 200",   value: "200 монет" },
+            { name: "🎁 БОНУС", value: "БОНУСНЫЙ ПРИЗ" },
+            { name: "🍀 500",   value: "500 монет" },
+            { name: "🏆 1000",  value: "1000 монет" },
+            { name: "💎 ДЖЕКПОТ", value: "ДЖЕКПОТ 5000!" },
+            { name: "🔄 ПОВТОР", value: "Попробуй ещё раз" },
+            { name: "⭐ СУПЕР",  value: "СУПЕРПРИЗ - 2500" }
+        ];
+        
+        // Цветовая палитра секторов (золотистые, красные, изумрудные)
+        const COLOR_PALETTE = [
+            "#FFD966", "#F4A261", "#E76F51", "#2A9D8F", 
+            "#E9C46A", "#E76F51", "#6A994E", "#BC4A2C"
+        ];
+        
+        const PI = Math.PI;
+        const TAU = PI * 2;
+        const SEG_COUNT = SEGMENTS.length;
+        const ANGLE_STEP = TAU / SEG_COUNT;
+        
+        // Холст и контекст
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Размеры и центр
+        let width = 600, height = 600;
+        let centerX = 300, centerY = 300;
+        let radius = 260;      // внешний радиус колеса
+        
+        // Переменные анимации
+        let currentRotation = 0.0;       // текущий угол поворота (нормализованный 0..2PI)
+        let animating = false;
+        let animFrameId = null;
+        let spinStartTime = 0;
+        let spinDuration = 1800;          // мс
+        let startRotation = 0;
+        let targetRotationRaw = 0;         // целевой угол без нормализации (для анимации полных оборотов)
+        let finalRawDelta = 0;
+        
+        // DOM элементы
+        const spinBtn = document.getElementById('spinButton');
+        const resultDiv = document.getElementById('resultMessage');
+        
+        // ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
+        function normalizeAngle(angle) {
+            angle = angle % TAU;
+            if (angle < 0) angle += TAU;
+            return angle;
+        }
+        
+        // Определение индекса сектора по текущему углу поворота колеса (стрелка всегда сверху: угол -PI/2)
+        function getCurrentSegmentIndex(rotationRad) {
+            // Стрелка указывает строго вверх (угол -PI/2 или 3*PI/2). Приведём к 0..TAU
+            let pointerAngle = -PI/2;
+            pointerAngle = normalizeAngle(pointerAngle);
+            
+            // Для каждого сегмента проверяем попадание pointerAngle в диапазон (rotation + i*step , rotation + (i+1)*step)
+            for (let i = 0; i < SEG_COUNT; i++) {
+                let startSeg = normalizeAngle(rotationRad + i * ANGLE_STEP);
+                let endSeg = normalizeAngle(rotationRad + (i+1) * ANGLE_STEP);
+                
+                if (startSeg < endSeg) {
+                    // обычный интервал без перехода через 0
+                    if (pointerAngle >= startSeg && pointerAngle < endSeg) return i;
+                } else {
+                    // интервал переходит через 0 (например, от 300° до 20°)
+                    if (pointerAngle >= startSeg || pointerAngle < endSeg) return i;
+                }
+            }
+            // fallback (никогда не случится при корректной геометрии)
+            return 0;
+        }
+        
+        // Обновляет текст результата по текущему вращению
+        function updateResultByRotation(rotation) {
+            const idx = getCurrentSegmentIndex(rotation);
+            const prize = SEGMENTS[idx].value;
+            resultDiv.innerHTML = `${SEGMENTS[idx].name} → ${prize} ✨`;
+            // дополнительный стиль при джекпоте или суперпризе
+            if (SEGMENTS[idx].name.includes("ДЖЕКПОТ")) {
+                resultDiv.style.animation = "none";
+                resultDiv.style.textShadow = "0 0 8px gold";
+                setTimeout(() => { resultDiv.style.textShadow = ""; }, 200);
+            } else {
+                resultDiv.style.textShadow = "";
+            }
+        }
+        
+        // ---------- ОТРИСОВКА КОЛЕСА (СЕКТОРА + ТЕКСТ + СТРЕЛКА) ----------
+        function drawWheel(rotationRad) {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, width, height);
+            
+            // нормализуем отображаемый угол
+            const displayRot = normalizeAngle(rotationRad);
+            
+            // рисуем сегменты
+            for (let i = 0; i < SEG_COUNT; i++) {
+                const start = displayRot + i * ANGLE_STEP;
+                const end = start + ANGLE_STEP;
+                
+                // цвет сектора
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, start, end);
+                ctx.lineTo(centerX, centerY);
+                ctx.fillStyle = COLOR_PALETTE[i % COLOR_PALETTE.length];
+                ctx.fill();
+                ctx.save();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = "#FFF2CF";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Текст внутри сектора
+                ctx.save();
+                const midAngle = start + ANGLE_STEP / 2;
+                const textRadius = radius * 0.72;
+                const x = centerX + Math.cos(midAngle) * textRadius;
+                const y = centerY + Math.sin(midAngle) * textRadius;
+                
+                let text = SEGMENTS[i].name;
+                // подгон шрифта под длину текста
+                let fontSize = 22;
+                if (text.length > 8) fontSize = 18;
+                if (text.length > 12) fontSize = 14;
+                ctx.font = `bold ${fontSize}px "Segoe UI", "Poppins", system-ui`;
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = "#1F2A0E";
+                ctx.shadowColor = "rgba(0,0,0,0)";
+                // поворачиваем текст для читаемости (радиально)
+                ctx.translate(x, y);
+                let angleRot = midAngle;
+                // Добавляем поворот, чтобы текст шел от центра наружу и не был вверх ногами
+                let rot = angleRot + PI/2;
+                if (angleRot > PI/2 && angleRot < 3*PI/2) rot += PI;
+                ctx.rotate(rot);
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "#1f2a0e";
+                ctx.fillText(text, 0, 0);
+                ctx.fillStyle = "#FFF6E0";
+                ctx.fillText(text, -1, -1);
+                ctx.fillStyle = "#2E241F";
+                ctx.fillText(text, 0, 0);
+                ctx.restore();
+            }
+            
+            // внутренний круг (декор)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.18, 0, TAU);
+            ctx.fillStyle = "#E8C47F";
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.12, 0, TAU);
+            ctx.fillStyle = "#AB6F3A";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.07, 0, TAU);
+            ctx.fillStyle = "#F7D44A";
+            ctx.fill();
+            
+            // центральный болт 
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.05, 0, TAU);
+            ctx.fillStyle = "#F5B042";
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // РИСУЕМ СТРЕЛКУ (неподвижную, сверху)
+            ctx.beginPath();
+            const arrowX = centerX;
+            const arrowY = centerY - radius - 12;
+            const arrowSize = 28;
+            ctx.moveTo(arrowX, arrowY);
+            ctx.lineTo(arrowX - 15, arrowY + 22);
+            ctx.lineTo(arrowX - 6, arrowY + 16);
+            ctx.lineTo(arrowX - 6, arrowY + 32);
+            ctx.lineTo(arrowX + 6, arrowY + 32);
+            ctx.lineTo(arrowX + 6, arrowY + 16);
+            ctx.lineTo(arrowX + 15, arrowY + 22);
+            ctx.fillStyle = "#FFD966";
+            ctx.shadowBlur = 6;
+            ctx.fill();
+            ctx.fillStyle = "#FFA047";
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY);
+            ctx.lineTo(arrowX - 8, arrowY + 14);
+            ctx.lineTo(arrowX, arrowY + 8);
+            ctx.lineTo(arrowX + 8, arrowY + 14);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(arrowX, arrowY+4, 5, 0, TAU);
+            ctx.fill();
+            ctx.fillStyle = "#b34e1a";
+            ctx.beginPath();
+            ctx.arc(arrowX, arrowY+4, 3, 0, TAU);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Дополнительные декоративные блики на ободе
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius+3, 0, TAU);
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = "#FFE3A4";
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius-6, 0, TAU);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#FFC857";
+            ctx.stroke();
+        }
+        
+        // ---------- АНИМАЦИЯ ВРАЩЕНИЯ С ЗАМЕДЛЕНИЕМ ----------
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        function animateSpin(now) {
+            const elapsed = now - spinStartTime;
+            let t = Math.min(1, elapsed / spinDuration);
+            const ease = easeOutCubic(t);
+            // промежуточное сырое значение вращения: от startRotation до (startRotation + finalRawDelta)
+            const rawInterp = startRotation + finalRawDelta * ease;
+            // отрисовываем с нормализованным углом (только для внешнего вида)
+            const displayAngle = normalizeAngle(rawInterp);
+            drawWheel(displayAngle);
+            
+            if (t < 1) {
+                animFrameId = requestAnimationFrame(animateSpin);
+            } else {
+                // Анимация завершена
+                const finalRaw = startRotation + finalRawDelta;
+                const finalNormalized = normalizeAngle(finalRaw);
+                currentRotation = finalNormalized;
+                drawWheel(currentRotation);
+                // Определяем выигрыш
+                const winIndex = getCurrentSegmentIndex(currentRotation);
+                const winPrize = SEGMENTS[winIndex].value;
+                resultDiv.innerHTML = `${SEGMENTS[winIndex].name} → ${winPrize} 🎉`;
+                if (SEGMENTS[winIndex].name.includes("ДЖЕКПОТ")) {
+                    resultDiv.style.animation = "glowPulse 0.5s ease";
+                    setTimeout(() => { if(resultDiv) resultDiv.style.animation = ""; }, 600);
+                } else if (SEGMENTS[winIndex].name.includes("СУПЕР")) {
+                    resultDiv.style.transform = "scale(1.02)";
+                    setTimeout(() => { if(resultDiv) resultDiv.style.transform = ""; }, 300);
+                }
+                // Разблокируем кнопку
+                animating = false;
+                spinBtn.disabled = false;
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+        }
+        
+        // Основная функция запуска вращения
+        function spinWheel() {
+            if (animating) return;
+            
+            // Генерируем количество оборотов: от 5 до 11 полных + дополнительный случайный доворот
+            const fullTurns = 5 + Math.floor(Math.random() * 7);  // 5-11 полных оборотов
+            const extraRad = Math.random() * TAU;  // случайный доворот до полного круга
+            const deltaRad = (fullTurns * TAU) + extraRad;
+            
+            // запоминаем начальные данные
+            startRotation = currentRotation;
+            finalRawDelta = deltaRad;
+            
+            // запускаем анимацию
+            animating = true;
+            spinBtn.disabled = true;
+            spinStartTime = performance.now();
+            animFrameId = requestAnimationFrame(animateSpin);
+        }
+        
+        // Ручной сброс результата (опционально)
+        function syncResultFromCurrent() {
+            const idx = getCurrentSegmentIndex(currentRotation);
+            resultDiv.innerHTML = `${SEGMENTS[idx].name} → ${SEGMENTS[idx].value}`;
+        }
+        
+        // ---------- ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ----------
+        function resizeAndCenter() {
+            // получаем реальные размеры canvas (но у нас фикс 600, но на случай если CSS изменит)
+            width = canvas.width;
+            height = canvas.height;
+            centerX = width / 2;
+            centerY = height / 2;
+            radius = Math.min(width, height) * 0.43; // ~258 при 600
+            if (radius > 265) radius = 265;
+            drawWheel(currentRotation);
+        }
+        
+        // изменение размера окна (адаптив)
+        window.addEventListener('resize', () => {
+            resizeAndCenter();
+        });
+        
+        // клик по кнопке
+        spinBtn.addEventListener('click', spinWheel);
+        // также можно крутить нажатием на само колесо (дополнительный UX)
+        canvas.addEventListener('click', (e) => {
+            e.stopPropagation();
+            spinWheel();
+        });
+        
+        // предзагрузка и отрисовка
+        currentRotation = normalizeAngle(Math.random() * TAU); // случайная стартовая позиция
+        resizeAndCenter();
+        syncResultFromCurrent();
+        
+        // добавим небольшую анимацию свечения для результата при джекпоте (динамический keyframe)
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = `
+            @keyframes glowPulse {
+                0% { text-shadow: 0 0 0px gold; opacity: 1; transform: scale(1);}
+                50% { text-shadow: 0 0 20px #ffb347; transform: scale(1.05);}
+                100% { text-shadow: 0 0 0px gold; transform: scale(1);}
+            }
+        `;
+        document.head.appendChild(styleSheet);
+        
+        // при загрузке показываем подсказку
+        console.log("Колесо фортуны готово! Сделано с Canvas + честная рандомная анимация.");
+    })();
+</script>
+</body>
+</html>
