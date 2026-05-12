@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0">
+  <title>🏠 СтройДом – песочница строителя</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #2b5a3a 0%, #1e3b28 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+      padding: 1.5rem;
+      margin: 0;
+    }
+
+    .game-container {
+      max-width: 750px;
+      width: 100%;
+      background: rgba(255, 248, 235, 0.9);
+      backdrop-filter: blur(24px);
+      background: #fbf3e0;
+      border-radius: 3.5rem;
+      padding: 2rem 2rem 2.2rem;
+      box-shadow: 0 35px 65px rgba(0, 0, 0, 0.6), inset 0 1px 10px rgba(255, 255, 200, 0.6);
+      border: 2px solid #c9a87c;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 750;
+      color: #4b3621;
+      text-shadow: 2px 2px 0 #f7e5c2;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.2rem;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border-radius: 2rem;
+      box-shadow: 0 18px 35px rgba(0,0,0,0.5), inset 0 0 0 3px #b5956b;
+      background: #dcedc8;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      max-width: 550px;
+      touch-action: none; /* улучшение для тач-устройств */
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      background: #efd7b6;
+      padding: 0.9rem 1.8rem;
+      border-radius: 3rem;
+      box-shadow: inset 0 3px 8px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.3);
+      border: 1px solid #b5956b;
+    }
+
+    .block-btn {
+      background: #faf0e1;
+      border: 2px solid #b48b5a;
+      border-radius: 2.2rem;
+      padding: 0.6rem 1.3rem;
+      font-weight: bold;
+      font-size: 1rem;
+      color: #4e3b28;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+      background: #ffe9ce;
+      letter-spacing: 0.4px;
+    }
+
+    .block-btn i {
+      font-size: 1.2rem;
+      color: #7b5e3b;
+    }
+
+    .block-btn.active {
+      background: #f4b642;
+      border-color: #8b5a2b;
+      color: #2d2416;
+      box-shadow: 0 0 18px #fdaa33;
+      transform: scale(1.03);
+      font-weight: 700;
+    }
+
+    .block-btn:hover {
+      background: #f7d59a;
+      border-color: #7b4f24;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      margin-left: 0.5rem;
+    }
+
+    .icon-btn {
+      background: #fff5e6;
+      border: 2px solid #aa7c4e;
+      border-radius: 2.5rem;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      background: #fbead7;
+      color: #4a3927;
+      transition: 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .icon-btn:hover {
+      background: #f5cd94;
+      border-color: #6b4a24;
+    }
+
+    .reset-btn {
+      background: #ffe0c0;
+      border-color: #b77c4a;
+      color: #4a2c1a;
+    }
+
+    .instruction {
+      color: #5b4633;
+      font-weight: 500;
+      font-size: 0.9rem;
+      background: rgba(255,255,220,0.7);
+      padding: 0.3rem 1.2rem;
+      border-radius: 20px;
+    }
+
+    @media (max-width: 500px) {
+      .game-container {
+        padding: 1.5rem 1rem;
+      }
+      .toolbar {
+        gap: 0.4rem;
+        padding: 0.6rem 1rem;
+      }
+      .block-btn {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <h1>
+    <span>🏡</span> СтройДом
+  </h1>
+
+  <!-- Холст для строительства -->
+  <canvas id="gameCanvas" width="500" height="500" aria-label="Игровое поле для строительства дома"></canvas>
+
+  <!-- Панель инструментов -->
+  <div class="toolbar">
+    <button class="block-btn active" id="btnWall">
+      <i>🧱</i> Стена
+    </button>
+    <button class="block-btn" id="btnWindow">
+      <i>🪟</i> Окно
+    </button>
+    <button class="block-btn" id="btnDoor">
+      <i>🚪</i> Дверь
+    </button>
+    <button class="block-btn" id="btnRoof">
+      <i>🔺</i> Крыша
+    </button>
+
+    <div class="action-btns">
+      <button class="icon-btn" id="btnRemove" title="Удалить блок (ластик)">
+        <i>🧹</i> Ластик
+      </button>
+      <button class="icon-btn reset-btn" id="btnReset">
+        <i>🔄</i> Сброс
+      </button>
+    </div>
+  </div>
+  <div class="instruction">
+    💡 Нажми на блок в панели, затем кликни по сетке, чтобы строить. Ластик убирает детали.
+  </div>
+</div>
+
+<script>
+  (function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Размеры сетки
+    const COLS = 10;
+    const ROWS = 10;
+    const CELL_SIZE = canvas.width / COLS; // 50px
+
+    // Типы блоков
+    const BLOCK_TYPES = {
+      EMPTY: 'empty',
+      WALL: 'wall',
+      WINDOW: 'window',
+      DOOR: 'door',
+      ROOF: 'roof'
+    };
+
+    // Описание блоков (цвета, эмодзи для отрисовки)
+    const blockVisuals = {
+      [BLOCK_TYPES.EMPTY]: { color: '#dcedc8', emoji: '' },
+      [BLOCK_TYPES.WALL]: { color: '#b78c5a', emoji: '🧱' },
+      [BLOCK_TYPES.WINDOW]: { color: '#add8e6', emoji: '🪟' },
+      [BLOCK_TYPES.DOOR]: { color: '#8b5a2b', emoji: '🚪' },
+      [BLOCK_TYPES.ROOF]: { color: '#c44536', emoji: '🔺' }
+    };
+
+    // Игровое поле (двумерный массив)
+    let grid = [];
+
+    // Текущий выбранный инструмент (тип блока или 'remove')
+    let currentTool = BLOCK_TYPES.WALL;
+
+    // Инициализация пустого поля
+    function initGrid() {
+      grid = Array(ROWS).fill().map(() => Array(COLS).fill(BLOCK_TYPES.EMPTY));
+    }
+
+    // Отрисовка всей сетки
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const x = col * CELL_SIZE;
+          const y = row * CELL_SIZE;
+          const cellType = grid[row][col];
+
+          // Фон ячейки
+          ctx.fillStyle = blockVisuals[cellType].color;
+          ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+
+          // Рисуем эмодзи (если не пустая)
+          if (cellType !== BLOCK_TYPES.EMPTY) {
+            ctx.font = '26px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            // Лёгкая тень для читаемости
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 3;
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillText(blockVisuals[cellType].emoji, x + CELL_SIZE/2, y + CELL_SIZE/2);
+            // Убираем тень для остальных элементов
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+          }
+
+          // Рамка ячейки
+          ctx.strokeStyle = '#9b8c7a';
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+        }
+      }
+
+      // Дополнительно: обводка по периметру холста
+      ctx.strokeStyle = '#6b5a4b';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Установка блока в ячейку
+    function setBlock(row, col, blockType) {
+      if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+        grid[row][col] = blockType;
+        drawGrid();
+      }
+    }
+
+    // Удаление блока (установка EMPTY)
+    function removeBlock(row, col) {
+      setBlock(row, col, BLOCK_TYPES.EMPTY);
+    }
+
+    // Обработчик клика по canvas
+    function handleCanvasClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;   // отношение реального размера к CSS
+      const scaleY = canvas.height / rect.height;
+
+      // Координаты клика относительно canvas с учётом масштабирования
+      let clientX, clientY;
+
+      if (e.touches) {
+        // Мобильное касание
+        if (e.touches.length === 0) return;
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+        e.preventDefault(); // чтобы не скроллилось
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      const canvasX = (clientX - rect.left) * scaleX;
+      const canvasY = (clientY - rect.top) * scaleY;
+
+      const col = Math.floor(canvasX / CELL_SIZE);
+      const row = Math.floor(canvasY / CELL_SIZE);
+
+      if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+        if (currentTool === 'remove') {
+          removeBlock(row, col);
+        } else {
+          // Устанавливаем выбранный тип блока
+          setBlock(row, col, currentTool);
+        }
+      }
+    }
+
+    // Обновление активной кнопки в тулбаре
+    function updateActiveButton(activeId) {
+      document.querySelectorAll('.block-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(activeId);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Также сброс подсветки с ластика (он не block-btn, но визуально отдельно)
+    }
+
+    // Привязка событий к кнопкам инструментов
+    function bindToolbarEvents() {
+      document.getElementById('btnWall').addEventListener('click', () => {
+        currentTool = BLOCK_TYPES.WALL;
+        updateActiveButton('btnWall');
+      });
+
+      document.getElementById('btnWindow').addEventListener('click', () => {
+        currentTool = BLOCK_TYPES.WINDOW;
+        updateActiveButton('btnWindow');
+      });
+
+      document.getElementById('btnDoor').addEventListener('click', () => {
+        currentTool = BLOCK_TYPES.DOOR;
+        updateActiveButton('btnDoor');
+      });
+
+      document.getElementById('btnRoof').addEventListener('click', () => {
+        currentTool = BLOCK_TYPES.ROOF;
+        updateActiveButton('btnRoof');
+      });
+
+      document.getElementById('btnRemove').addEventListener('click', () => {
+        currentTool = 'remove';
+        // Убираем активный класс со всех кнопок блоков
+        document.querySelectorAll('.block-btn').forEach(btn => btn.classList.remove('active'));
+        // Визуально можно подсветить ластик (но он отдельная кнопка)
+      });
+
+      document.getElementById('btnReset').addEventListener('click', () => {
+        initGrid();
+        drawGrid();
+        // Оставляем текущий инструмент, но можно вернуть на стену по желанию
+        // Для удобства: если был ластик, переключим на стену
+        if (currentTool === 'remove') {
+          currentTool = BLOCK_TYPES.WALL;
+          updateActiveButton('btnWall');
+        }
+      });
+    }
+
+    // Начальная установка событий canvas (мышь и тач)
+    function bindCanvasEvents() {
+      canvas.addEventListener('click', handleCanvasClick);
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleCanvasClick(e);
+      }, { passive: false });
+      // Также поддержим touchmove для рисования пальцем (опционально, но удобно)
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        handleCanvasClick(e);
+      }, { passive: false });
+    }
+
+    // Старт игры
+    function startGame() {
+      initGrid();
+      drawGrid();
+      bindToolbarEvents();
+      bindCanvasEvents();
+      // Убедимся, что активная кнопка "Стена" выделена
+      updateActiveButton('btnWall');
+      currentTool = BLOCK_TYPES.WALL;
+    }
+
+    // Запуск после загрузки страницы
+    window.addEventListener('load', startGame);
+  })();
+</script>
+</body>
+</html>
