@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Портфолио | Демид Шевченко </title>
+  <!-- Подключение шрифта и иконок -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 10% 20%, #1e1b2e, #0b0a12 80%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      margin: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 30% 40%, rgba(138, 43, 226, 0.25) 0%, transparent 55%),
+                  radial-gradient(ellipse at 75% 65%, rgba(255, 140, 0, 0.18) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Основная карточка портфолио */
+    .portfolio-card {
+      position: relative;
+      z-index: 2;
+      max-width: 750px;
+      width: 100%;
+      background: rgba(20, 18, 30, 0.7);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      background: linear-gradient(145deg, rgba(30, 27, 45, 0.85) 0%, rgba(18, 16, 28, 0.9) 100%);
+      border-radius: 3.5rem;
+      padding: 2.8rem 2.5rem;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+      color: #e0d9f0;
+    }
+
+    /* Шапка профиля */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 110px;
+      height: 110px;
+      background: linear-gradient(145deg, #b78cf0, #7f5fc0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #f0e7ff;
+      box-shadow: 0 15px 28px rgba(130, 90, 240, 0.45);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease;
+    }
+
+    .avatar:hover {
+      transform: scale(1.04);
+    }
+
+    .name-section h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #f0e7ff, #cbb5ff, #a688fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.3rem;
+      line-height: 1.2;
+    }
+
+    .tagline {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.4rem 1.3rem;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #c9bce5;
+      backdrop-filter: blur(5px);
+      display: inline-block;
+      letter-spacing: 0.3px;
+    }
+
+    /* Секции */
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 650;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 2px solid rgba(180, 130, 255, 0.4);
+      padding-bottom: 0.5rem;
+      letter-spacing: -0.2px;
+    }
+
+    .section-title i {
+      color: #b78cf0;
+      font-size: 1.6rem;
+    }
+
+    /* Навыки */
+    .skills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .skill-badge {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(6px);
+      padding: 0.5rem 1.3rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ddd0f5;
+      transition: 0.25s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .skill-badge i {
+      color: #c49cff;
+      font-size: 0.9rem;
+    }
+
+    .skill-badge:hover {
+      background: rgba(180, 130, 255, 0.2);
+      border-color: #b78cf0;
+      transform: translateY(-2px);
+    }
+
+    /* Проект (вставленный мини-хаб) */
+    .project-showcase {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 2.5rem;
+      padding: 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .hub-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .game-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(105deg, rgba(45, 40, 60, 0.8) 0%, rgba(30, 27, 44, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 2rem;
+      padding: 1rem 1.6rem;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+      gap: 0.8rem;
+    }
+
+    .game-link:hover {
+      transform: translateY(-3px);
+      border-color: rgba(200, 160, 255, 0.55);
+      background: rgba(65, 53, 90, 0.7);
+      box-shadow: 0 14px 24px rgba(140, 100, 255, 0.3);
+    }
+
+    .link-emoji {
+      font-size: 2.3rem;
+      filter: drop-shadow(0 4px 6px black);
+    }
+
+    .link-text {
+      flex: 1;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #ebdfff;
+      letter-spacing: -0.2px;
+    }
+
+    .link-arrow {
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #cbb9f0;
+      transition: 0.3s;
+    }
+
+    .game-link:hover .link-arrow {
+      background: #b78cf0;
+      color: #12101c;
+    }
+
+    .project-note {
+      font-size: 0.8rem;
+      color: #9a8ab3;
+      margin-top: 0.8rem;
+      text-align: center;
+    }
+
+    /* Контакты */
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .contact-btn {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(8px);
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      color: #ddd0f5;
+      text-decoration: none;
+      font-weight: 550;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: 0.25s;
+      font-size: 1rem;
+    }
+
+    .contact-btn i {
+      font-size: 1.2rem;
+      color: #c49cff;
+    }
+
+    .contact-btn:hover {
+      background: #b78cf0;
+      border-color: #b78cf0;
+      color: #0f0c1a;
+      font-weight: 600;
+      box-shadow: 0 10px 22px rgba(160, 110, 255, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .contact-btn:hover i {
+      color: #0f0c1a;
+    }
+
+    hr {
+      border-color: rgba(255,255,255,0.1);
+      margin: 0.5rem 0;
+    }
+
+    @media (max-width: 500px) {
+      .portfolio-card {
+        padding: 2rem 1.5rem;
+      }
+      .name-section h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="portfolio-card">
+    
+    <!-- Имя и кем хочу стать -->
+    <div class="profile-header">
+      <div class="avatar">АР</div>
+      <div class="name-section">
+        <h1>Алексей Романов</h1>
+        <div class="tagline">
+          <i class="fas fa-rocket" style="margin-right: 5px;"></i> Frontend-разработчик · создаю интерактивные инструменты
+        </div>
+      </div>
+    </div>
+
+    <!-- Чем занимаюсь / навыки -->
+    <div>
+      <div class="section-title">
+        <i class="fas fa-code"></i> Технологии и занятия
+      </div>
+      <div class="skills-container">
+        <div class="skill-badge"><i class="fab fa-html5"></i> HTML5</div>
+        <div class="skill-badge"><i class="fab fa-css3-alt"></i> CSS3</div>
+        <div class="skill-badge"><i class="fab fa-js"></i> JavaScript</div>
+        <div class="skill-badge"><i class="fas fa-paint-brush"></i> UI-дизайн</div>
+        <div class="skill-badge"><i class="fas fa-mobile-alt"></i> Адаптивная вёрстка</div>
+        <div class="skill-badge"><i class="fas fa-gamepad"></i> Мини-игры</div>
+        <div class="skill-badge"><i class="fas fa-chart-pie"></i> Интерактивные виджеты</div>
+      </div>
+    </div>
+
+    <!-- Проекты (встроенный мини-хаб) -->
+    <div>
+      <div class="section-title">
+        <i class="fas fa-folder-open"></i> Проект: Мини-хаб
+      </div>
+      <div class="project-showcase">
+        <div class="hub-inner">
+          <!-- Ссылка Колесо фортуны (оставь свои имена файлов) -->
+          <a href="deepseek_html_20260506_54fb97.html" class="game-link">
+            <span class="link-emoji">🎡</span>
+            <span class="link-text">Колесо фортуны</span>
+            <span class="link-arrow"><i class="fas fa-arrow-right"></i></span>
+          </a>
+          <!-- Ссылка Тир-лист -->
+          <a href="deepseek_html_20260506_3efa6a.html" class="game-link">
+            <span class="link-emoji">🏆</span>
+            <span class="link-text">Tier-лист</span>
+            <span class="link-arrow"><i class="fas fa-arrow-right"></i></span>
+          </a>
+        </div>
+        <div class="project-note">
+          💡 Интерактивный хаб: колесо удачи и система ранжирования
+        </div>
+      </div>
+    </div>
+
+    <!-- Кем хочу стать -->
+    <div>
+      <div class="section-title">
+        <i class="fas fa-star"></i> Кем хочу стать
+      </div>
+      <div style="background: rgba(180, 130, 255, 0.12); border-left: 4px solid #b78cf0; padding: 1rem 1.5rem; border-radius: 1.2rem; font-weight: 500; backdrop-filter: blur(5px);">
+        <i class="fas fa-bullseye" style="margin-right: 0.7rem; color: #cfb3ff;"></i>
+        Стать <strong>креативным frontend-разработчиком</strong> и создавать полезные веб-инструменты, которые приносят радость пользователям. Развиваться в направлении UX-инжиниринга и игровых интерфейсов.
+      </div>
+    </div>
+
+    <!-- Контакты -->
+    <hr>
+    <div>
+      <div class="section-title">
+        <i class="fas fa-address-card"></i> Контакты
+      </div>
+      <div class="contact-row">
+        <a href="#" class="contact-btn"><i class="fab fa-github"></i> GitHub</a>
+        <a href="#" class="contact-btn"><i class="fab fa-telegram-plane"></i> Telegram</a>
+        <a href="#" class="contact-btn"><i class="fas fa-envelope"></i> Email</a>
+        <a href="#" class="contact-btn"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+      </div>
+      <div style="text-align: center; margin-top: 1.2rem; font-size: 0.8rem; color: #7b6d96;">
+        © 2025 Алексей Романов – портфолио с мини-хабом
+      </div>
+    </div>
+  </div>
+</body>
+</html>
