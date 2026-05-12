@@ -1,12 +1,296 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>🎯 Мини-хаб | Колесо фортуны и Тир-лист</title>
+  <!-- Подключаем аккуратный шрифт для современного вида -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 10% 20%, #1e1b2e, #0b0a12 80%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      margin: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Декоративные световые пятна на фоне */
+    body::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 30% 40%, rgba(138, 43, 226, 0.25) 0%, transparent 55%),
+                  radial-gradient(ellipse at 75% 65%, rgba(255, 140, 0, 0.18) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Основная карточка-контейнер */
+    .hub-container {
+      position: relative;
+      z-index: 2;
+      max-width: 650px;
+      width: 100%;
+      background: rgba(20, 18, 30, 0.7);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      background: linear-gradient(145deg, rgba(30, 27, 45, 0.85) 0%, rgba(18, 16, 28, 0.9) 100%);
+      border-radius: 3.5rem;
+      padding: 2.8rem 2.5rem;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.3rem;
+    }
+
+    /* Заголовок с изюминкой */
+    .title-section {
+      text-align: center;
+    }
+
+    .title-section h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #f0e7ff, #d9c5ff, #b892ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.35rem;
+      text-shadow: 0 2px 12px rgba(180, 130, 255, 0.3);
+      line-height: 1.2;
+    }
+
+    .sub-glow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #b9adc7;
+      letter-spacing: 0.3px;
+    }
+
+    .sub-glow span {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      color: #cfc1e6;
+    }
+
+    /* Сетка для карточек-ссылок */
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1.2rem;
+    }
+
+    /* Стилизация каждой ссылки как стильной карточки */
+    .game-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: linear-gradient(105deg, rgba(45, 40, 60, 0.7) 0%, rgba(30, 27, 44, 0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 2.2rem;
+      padding: 1.2rem 1.8rem;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      gap: 1rem;
+    }
+
+    /* Эффект свечения при наведении */
+    .game-link::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .game-link:hover::after {
+      left: 100%;
+    }
+
+    .game-link:hover {
+      transform: translateY(-3px) scale(1.01);
+      border-color: rgba(200, 160, 255, 0.5);
+      box-shadow: 0 18px 28px rgba(0, 0, 0, 0.6), 0 0 18px rgba(160, 120, 255, 0.35);
+      background: linear-gradient(105deg, rgba(60, 50, 80, 0.8) 0%, rgba(40, 33, 56, 0.9) 100%);
+    }
+
+    /* Иконка/эмодзи в начале */
+    .link-icon {
+      font-size: 2.6rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+      transition: transform 0.3s ease;
+      min-width: 55px;
+      text-align: center;
+    }
+
+    .game-link:hover .link-icon {
+      transform: rotate(3deg) scale(1.08);
+    }
+
+    /* Текстовая часть */
+    .link-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .link-title {
+      font-size: 1.5rem;
+      font-weight: 650;
+      letter-spacing: -0.3px;
+      background: linear-gradient(to bottom, #ffffff, #dbd2f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.2rem;
+    }
+
+    .link-subtitle {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #a294bc;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Стрелочка справа */
+    .arrow-indicator {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: #cbb9f0;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .game-link:hover .arrow-indicator {
+      background: rgba(200, 150, 255, 0.2);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow: 0 0 14px rgba(180, 130, 255, 0.6);
+    }
+
+    /* Нижний декоративный текст */
+    .footer-note {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #6d6380;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-top: 1.3rem;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .footer-note i {
+      font-style: normal;
+      font-size: 1rem;
+    }
+
+    /* Адаптивность для мобильных */
+    @media (max-width: 480px) {
+      .hub-container {
+        padding: 2rem 1.5rem;
+        border-radius: 2.8rem;
+      }
+      .game-link {
+        padding: 1rem 1.3rem;
+        border-radius: 1.8rem;
+      }
+      .link-title {
+        font-size: 1.3rem;
+      }
+      .title-section h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <a href="deepseek_html_20260506_54fb97.html">Колесо фортуны</a>
-    <a href="deepseek_html_20260506_3efa6a.html">Tier-list</a>
+  <div class="hub-container">
+    <div class="title-section">
+      <h1>✨ Игровой портал</h1>
+      <div class="sub-glow">
+        <span>⚡ выбери развлечение</span>
+      </div>
+    </div>
+
+    <div class="links-grid">
+      <!-- Ссылка 1: Колесо фортуны -->
+      <a href="deepseek_html_20260506_54fb97.html" class="game-link">
+        <div class="link-icon">🎡</div>
+        <div class="link-content">
+          <span class="link-title">Колесо фортуны</span>
+          <span class="link-subtitle">
+            <span>🌀</span> Испытай удачу
+          </span>
+        </div>
+        <div class="arrow-indicator">→</div>
+      </a>
+
+      <!-- Ссылка 2: Тир-лист -->
+      <a href="deepseek_html_20260506_3efa6a.html" class="game-link">
+        <div class="link-icon">🏆</div>
+        <div class="link-content">
+          <span class="link-title">Tier-лист</span>
+          <span class="link-subtitle">
+            <span>📊</span> Расставь по рангам
+          </span>
+        </div>
+        <div class="arrow-indicator">→</div>
+      </a>
+    </div>
+
+    <div class="footer-note">
+      <i>💠</i> нажми на карточку, чтобы открыть <i>💠</i>
+    </div>
+  </div>
 </body>
 </html>
