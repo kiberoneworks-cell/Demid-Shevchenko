@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, touch-action: manipulation">
+  <title>👆 ТАПАТЬ ПО ЭКРАНУ | Кликер-игра</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+      padding: 1rem;
+      margin: 0;
+      touch-action: pan-x pan-y; /* разрешаем скролл страницы если надо, но внутри игры управляем */
+    }
+
+    .game-wrapper {
+      max-width: 500px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 3.5rem;
+      padding: 1.8rem;
+      box-shadow: 0 30px 45px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    /* Верхняя панель со счетом */
+    .stats-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 10, 20, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 3rem;
+      padding: 1rem 1.8rem;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    .score-box {
+      display: flex;
+      align-items: baseline;
+      gap: 0.3rem;
+    }
+
+    .score-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #b9adff;
+    }
+
+    .score-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(to bottom, #ffffff, #e0d6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      text-shadow: 0 0 14px rgba(180, 140, 255, 0.7);
+    }
+
+    .tap-counter {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2rem;
+      padding: 0.5rem 1.3rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #cfc3ff;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Игровая зона для тапов */
+    .tap-area {
+      position: relative;
+      background: radial-gradient(circle at 50% 30%, #382f5c, #1b162c);
+      border-radius: 2.8rem;
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,0.5), 0 20px 30px rgba(0, 0, 0, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      touch-action: manipulation; /* отключаем зум/скролл внутри этого блока */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      overflow: hidden;
+      transition: transform 0.05s ease;
+    }
+
+    .tap-area:active {
+      transform: scale(0.98);
+    }
+
+    /* Центральный призыв к действию */
+    .tap-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      color: white;
+      text-shadow: 0 4px 10px black;
+      pointer-events: none; /* чтобы клики проходили сквозь на сам див */
+      z-index: 5;
+    }
+
+    .tap-emoji {
+      font-size: 4.5rem;
+      filter: drop-shadow(0 8px 12px #00000080);
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .tap-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: rgba(0,0,0,0.4);
+      padding: 0.3rem 1.5rem;
+      border-radius: 2rem;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Всплывающие +1 эффекты */
+    .float-score {
+      position: absolute;
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: #ffd966;
+      text-shadow: 0 0 12px #ffb347, 0 2px 6px black;
+      pointer-events: none;
+      animation: riseUp 0.9s ease-out forwards;
+      z-index: 20;
+      white-space: nowrap;
+    }
+
+    @keyframes riseUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8);
+      }
+      30% {
+        opacity: 1;
+        transform: translateY(-15px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-55px) scale(0.9);
+      }
+    }
+
+    /* Кнопка сброса */
+    .reset-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 2.5rem;
+      padding: 0.9rem 1.8rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #e0d7ff;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: rgba(30, 20, 40, 0.7);
+      transition: all 0.25s;
+      cursor: pointer;
+      margin-top: 0.2rem;
+      border: 1px solid rgba(200, 180, 255, 0.3);
+    }
+
+    .reset-btn:hover {
+      background: rgba(90, 60, 130, 0.5);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    .reset-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Медиа для очень маленьких экранов */
+    @media (max-width: 400px) {
+      .game-wrapper {
+        padding: 1.2rem;
+      }
+      .tap-emoji {
+        font-size: 3.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <!-- Статистика -->
+    <div class="stats-panel">
+      <div class="score-box">
+        <span class="score-label">ОЧКИ</span>
+        <span class="score-value" id="scoreDisplay">0</span>
+      </div>
+      <div class="tap-counter">
+        <span>👆</span> <span id="tapCountDisplay">0</span>
+      </div>
+    </div>
+
+    <!-- Игровое поле (зона для тапов) -->
+    <div class="tap-area" id="tapArea">
+      <div class="tap-prompt">
+        <div class="tap-emoji">👇</div>
+        <div class="tap-text">ТАПАЙ СЮДА</div>
+      </div>
+    </div>
+
+    <!-- Кнопка сброса -->
+    <button class="reset-btn" id="resetButton">
+      <span>🔄</span> Сбросить счёт
+    </button>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- СОСТОЯНИЕ ИГРЫ ----------
+      let score = 0;
+      let tapCount = 0;
+
+      // DOM элементы
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const tapCountDisplay = document.getElementById('tapCountDisplay');
+      const tapArea = document.getElementById('tapArea');
+      const resetBtn = document.getElementById('resetButton');
+
+      // ---------- ФУНКЦИЯ ОБНОВЛЕНИЯ ИНТЕРФЕЙСА ----------
+      function updateUI() {
+        scoreDisplay.textContent = score;
+        tapCountDisplay.textContent = tapCount;
+      }
+
+      // ---------- СОЗДАНИЕ ВСПЛЫВАЮЩЕГО ЭФФЕКТА +1 ----------
+      function createFloatingPlusOne(x, y) {
+        const floatEl = document.createElement('div');
+        floatEl.className = 'float-score';
+        // Случайный небольшой разброс, чтобы не накладывались идеально
+        const offsetX = (Math.random() * 16 - 8); // от -8 до 8 пикселей
+        const offsetY = (Math.random() * 10 - 15); // чуть выше касания
+        floatEl.style.left = `${x + offsetX}px`;
+        floatEl.style.top = `${y + offsetY}px`;
+        floatEl.textContent = '+1';
+        
+        tapArea.appendChild(floatEl);
+        
+        // Удаляем элемент после завершения анимации
+        floatEl.addEventListener('animationend', () => {
+          if (floatEl.parentNode === tapArea) {
+            tapArea.removeChild(floatEl);
+          }
+        });
+        
+        // Дополнительная защита: удалить через 1 секунду, если анимация не сработала
+        setTimeout(() => {
+          if (floatEl.parentNode === tapArea) {
+            tapArea.removeChild(floatEl);
+          }
+        }, 950);
+      }
+
+      // ---------- ОБРАБОТЧИК ТАПА (универсальный) ----------
+      function handleTap(e) {
+        // Предотвращаем стандартное поведение (например, выделение или контекстное меню)
+        e.preventDefault();
+        
+        // Определяем координаты касания/клика относительно tapArea
+        let clientX, clientY;
+        
+        if (e.touches) {
+          // Сенсорное событие
+          if (e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+          } else {
+            // Иногда touches может быть пустым (запасной вариант)
+            return;
+          }
+        } else {
+          // Мышь
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+        
+        // Получаем bounding box игровой области
+        const rect = tapArea.getBoundingClientRect();
+        
+        // Вычисляем координаты относительно tapArea
+        const relativeX = clientX - rect.left;
+        const relativeY = clientY - rect.top;
+        
+        // Проверяем, что координаты внутри области (на всякий случай)
+        if (relativeX < 0 || relativeY < 0 || relativeX > rect.width || relativeY > rect.height) {
+          // Клик вне зоны — игнорируем (но для touch это редкость из-за обработчика на самом элементе)
+          return;
+        }
+        
+        // Увеличиваем очки и счётчик тапов
+        score += 1;
+        tapCount += 1;
+        
+        // Обновляем отображение
+        updateUI();
+        
+        // Создаём визуальный эффект +1 в точке касания
+        createFloatingPlusOne(relativeX, relativeY);
+      }
+
+      // ---------- СБРОС ИГРЫ ----------
+      function resetGame() {
+        score = 0;
+        tapCount = 0;
+        updateUI();
+        
+        // Удаляем все оставшиеся floating-элементы (если есть)
+        const floatingElements = tapArea.querySelectorAll('.float-score');
+        floatingElements.forEach(el => el.remove());
+        
+        // Небольшая анимация подтверждения сброса (визуально)
+        tapArea.style.transition = '0.15s';
+        tapArea.style.backgroundColor = 'rgba(120, 80, 200, 0.3)';
+        setTimeout(() => {
+          tapArea.style.backgroundColor = '';
+          tapArea.style.transition = '';
+        }, 150);
+      }
+
+      // ---------- НАЗНАЧЕНИЕ ОБРАБОТЧИКОВ ----------
+      
+      // Для мыши: клик
+      tapArea.addEventListener('click', handleTap);
+      
+      // Для сенсорных устройств: используем touchstart (более отзывчиво) 
+      // и предотвращаем двойное срабатывание (click может дублироваться)
+      tapArea.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // важно, чтобы не было эмуляции клика и задержки
+        handleTap(e);
+      }, { passive: false });
+      
+      // Дополнительно: предотвращаем выделение и контекстное меню внутри игровой зоны
+      tapArea.addEventListener('contextmenu', (e) => e.preventDefault());
+      tapArea.addEventListener('selectstart', (e) => e.preventDefault());
+      
+      // Кнопка сброса
+      resetBtn.addEventListener('click', resetGame);
+      
+      // Для кнопки сброса тоже убираем возможные touch-залипания
+      resetBtn.addEventListener('touchstart', (e) => {
+        // Не предотвращаем полностью, чтобы кнопка сработала, но останавливаем всплытие? 
+        // Лучше оставить как есть, стандартный клик сработает.
+      });
+      
+      // Инициализация UI
+      updateUI();
+      
+      console.log('🎮 Игра "Тапай по экрану" готова! Нажимай на цветную область.');
+    })();
+  </script>
+</body>
+</html>
